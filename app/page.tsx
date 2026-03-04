@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { 
   Scale, Menu, X, ArrowRight, FileText, Users, Award, 
   Phone, MessageSquare, AlertCircle, Shield, Briefcase,
-  Heart, AlertTriangle, Lock, BarChart3, Zap, Eye, CheckCircle
+  Heart, AlertTriangle, Lock, BarChart3, Zap, Eye, CheckCircle,
+  Upload, Trash2, Brain, Copy
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -150,6 +151,7 @@ const AnimatedPieChart = ({ solved, unsolved, registered, label }: PieChartProps
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFileComplaintOpen, setIsFileComplaintOpen] = useState(false)
+  const [isAIAnalysisOpen, setIsAIAnalysisOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -159,6 +161,10 @@ export default function Home() {
     evidence: '',
     location: '',
   })
+  const [uploadedImages, setUploadedImages] = useState<File[]>([])
+  const [aiAnalysisInput, setAiAnalysisInput] = useState('')
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const caseCategories = [
     { id: 'harassment', label: 'Harassment', icon: AlertTriangle },
@@ -265,11 +271,102 @@ export default function Home() {
     },
   ]
 
+  const caseTypeMapping: { [key: string]: string } = {
+    'harassment': 'Harassment',
+    'cybercrime': 'Cyber Crime',
+    'theft': 'Theft',
+    'domestic': 'Domestic Violence',
+    'corruption': 'Corruption',
+    'fraud': 'Fraud/Cheating',
+    'assault': 'Assault/Battery',
+    'property': 'Property Dispute',
+    'labor': 'Labor Rights Violation',
+    'sexual': 'Sexual Harassment',
+    'child': 'Child Abuse',
+    'environmental': 'Environmental Violation'
+  }
+
+  const aiCaseInfo: { [key: string]: string } = {
+    'harassment': 'This case involves unwanted behavior causing distress. You may be entitled to file an FIR, seek compensation, and get court orders for protection.',
+    'cybercrime': 'This involves illegal activities on digital platforms. Report to Cyber Crime cell, preserve evidence, and avoid further contact with accused.',
+    'theft': 'This involves unlawful taking of property. File an FIR with local police, provide witness information, and documentation of stolen items.',
+    'domestic': 'Domestic violence cases are serious. Contact women helpline 1091, file protection order, and preserve medical/photographic evidence.',
+    'corruption': 'Report to Anti-Corruption Bureau, provide documentary evidence, and maintain records of all transactions and communications.',
+    'fraud': 'Preserve all documents, bank statements, agreements. Report to police and consumer protection authority with complete transaction history.',
+    'assault': 'Seek immediate medical attention, get medical certificate, file FIR with police, and collect witness statements.',
+    'property': 'Gather all property documents, prepare timeline of dispute, consult property lawyer, and keep all communications as evidence.',
+    'labor': 'Document work conditions, wages, hours. Contact Labor Department, keep salary slips, and maintain communication records.',
+    'sexual': 'Seek support from counselor, report to police, preserve evidence, contact women helpline 1091.',
+    'child': 'Contact child protection services immediately. Report to police, preserve evidence, ensure child safety.',
+    'environmental': 'Document pollution/damage with photos, report to pollution control board, and gather witness statements.'
+  }
+
+  const handleAIAnalysis = () => {
+    if (!aiAnalysisInput.trim()) {
+      alert('Please describe your case')
+      return
+    }
+
+    setIsAnalyzing(true)
+    setTimeout(() => {
+      // Simple AI logic - detect case type from keywords
+      const input = aiAnalysisInput.toLowerCase()
+      let detectedType = 'fraud'
+      
+      if (input.includes('harass')) detectedType = 'harassment'
+      else if (input.includes('cyber') || input.includes('online') || input.includes('hacking')) detectedType = 'cybercrime'
+      else if (input.includes('steal') || input.includes('theft') || input.includes('stolen')) detectedType = 'theft'
+      else if (input.includes('domestic') || input.includes('spouse') || input.includes('abuse')) detectedType = 'domestic'
+      else if (input.includes('corrupt') || input.includes('bribe')) detectedType = 'corruption'
+      else if (input.includes('fraud') || input.includes('scam') || input.includes('cheat')) detectedType = 'fraud'
+      else if (input.includes('assault') || input.includes('hit') || input.includes('beat')) detectedType = 'assault'
+      else if (input.includes('property') || input.includes('land') || input.includes('house')) detectedType = 'property'
+      else if (input.includes('labor') || input.includes('wage') || input.includes('salary') || input.includes('work')) detectedType = 'labor'
+      else if (input.includes('sexual') || input.includes('unwanted touch')) detectedType = 'sexual'
+      else if (input.includes('child') || input.includes('kid')) detectedType = 'child'
+      else if (input.includes('environment') || input.includes('pollution')) detectedType = 'environmental'
+
+      setAiAnalysisResult({
+        caseType: caseTypeMapping[detectedType],
+        caseId: detectedType,
+        description: aiCaseInfo[detectedType],
+        nextSteps: [
+          '1. Document all evidence (photos, videos, documents, messages)',
+          '2. Write detailed account with dates and times',
+          '3. Identify and list all witnesses',
+          '4. Contact relevant authorities immediately',
+          '5. Consult with a legal professional'
+        ],
+        relevantLaws: detectedType === 'harassment' ? ['IPC Section 503-506', 'Protection of Women from Sexual Harassment Act'] :
+                      detectedType === 'cybercrime' ? ['IPC Section 65-75', 'Information Technology Act 2000'] :
+                      detectedType === 'theft' ? ['IPC Section 378-382', 'Theft Act'] :
+                      ['Relevant Criminal Laws']
+      })
+      setIsAnalyzing(false)
+    }, 1500)
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      setUploadedImages([...uploadedImages, ...Array.from(files)])
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setUploadedImages(uploadedImages.filter((_, i) => i !== index))
+  }
+
   const handleSubmitComplaint = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Complaint submitted:', { category: selectedCategory, ...formData })
+    if (uploadedImages.length === 0) {
+      alert('Please upload at least one image as evidence')
+      return
+    }
+    console.log('Complaint submitted:', { category: selectedCategory, images: uploadedImages.length, ...formData })
     alert(`Complaint filed successfully for ${selectedCategory}!`)
     setFormData({ name: '', email: '', phone: '', description: '', evidence: '', location: '' })
+    setUploadedImages([])
     setSelectedCategory(null)
     setIsFileComplaintOpen(false)
   }
@@ -291,7 +388,9 @@ export default function Home() {
               <button 
                 onClick={() => setIsFileComplaintOpen(true)}
                 className="text-gray-700 hover:text-blue-600 transition font-medium">File Case</button>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 transition font-medium">AI Analysis</Link>
+              <button 
+                onClick={() => setIsAIAnalysisOpen(true)}
+                className="text-gray-700 hover:text-blue-600 transition font-medium">AI Analysis</button>
               <Link href="/login" className="text-gray-700 hover:text-blue-600 transition font-medium">My Cases</Link>
               <Link href="/login" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
                 Login
@@ -317,7 +416,12 @@ export default function Home() {
                   setIsMenuOpen(false)
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">File Case</button>
-              <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">AI Analysis</Link>
+              <button 
+                onClick={() => {
+                  setIsAIAnalysisOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">AI Analysis</button>
               <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">My Cases</Link>
               <Link href="/login" className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">Login</Link>
             </div>
@@ -335,13 +439,22 @@ export default function Home() {
             <p className="text-lg text-blue-100 max-w-2xl mx-auto">
               File complaints and analyze legal cases instantly with our intelligent platform.
             </p>
-            <button
-              onClick={() => setIsFileComplaintOpen(true)}
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition inline-flex items-center gap-2"
-            >
-              <FileText className="w-5 h-5" />
-              File Complaint Now
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => setIsFileComplaintOpen(true)}
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition inline-flex items-center justify-center gap-2"
+              >
+                <FileText className="w-5 h-5" />
+                File Complaint
+              </button>
+              <button
+                onClick={() => setIsAIAnalysisOpen(true)}
+                className="bg-blue-500 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-400 transition inline-flex items-center justify-center gap-2"
+              >
+                <Brain className="w-5 h-5" />
+                AI Case Analysis
+              </button>
+            </div>
           </div>
 
           {/* Animated Charts */}
@@ -353,27 +466,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Case Filing Modal */}
+      {/* Full-Screen File Complaint Page */}
       {isFileComplaintOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-3xl font-bold text-gray-900">File a Complaint</h2>
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+          <div className="min-h-screen">
+            {/* Header */}
+            <div className="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center shadow-lg">
+              <h1 className="text-3xl font-bold">File a Complaint</h1>
               <button 
                 onClick={() => {
                   setIsFileComplaintOpen(false)
                   setSelectedCategory(null)
+                  setUploadedImages([])
                 }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                className="p-2 hover:bg-blue-500 rounded-lg transition"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 max-h-96 overflow-y-auto">
+            <div className="max-w-4xl mx-auto p-6 md:p-8">
               {!selectedCategory ? (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Select Case Category</h3>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-8">Select Case Category</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {caseCategories.map((cat) => {
                       const Icon = cat.icon
@@ -393,26 +508,29 @@ export default function Home() {
               ) : (
                 <div>
                   <button 
-                    onClick={() => setSelectedCategory(null)}
-                    className="text-blue-600 hover:text-blue-700 font-medium mb-6 flex items-center gap-2"
+                    onClick={() => {
+                      setSelectedCategory(null)
+                      setUploadedImages([])
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-medium mb-8 flex items-center gap-2"
                   >
                     <ArrowRight className="w-4 h-4 rotate-180" />
                     Back to Categories
                   </button>
 
-                  <form onSubmit={handleSubmitComplaint} className="space-y-4">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">
-                      {caseCategories.find(c => c.id === selectedCategory)?.label} Details
-                    </h3>
+                  <form onSubmit={handleSubmitComplaint} className="space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      {caseCategories.find(c => c.id === selectedCategory)?.label} - Case Details
+                    </h2>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                         <input
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                           required
                         />
                       </div>
@@ -422,20 +540,20 @@ export default function Home() {
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                           required
                         />
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                         <input
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                           required
                         />
                       </div>
@@ -445,7 +563,7 @@ export default function Home() {
                           type="text"
                           value={formData.location}
                           onChange={(e) => setFormData({...formData, location: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                           required
                         />
                       </div>
@@ -456,40 +574,205 @@ export default function Home() {
                       <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="Describe the incident in detail..."
+                        rows={6}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="Describe the incident in detail with dates, times, and people involved..."
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Evidence/Documents (optional)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Additional Information</label>
                       <textarea
                         value={formData.evidence}
                         onChange={(e) => setFormData({...formData, evidence: e.target.value})}
-                        rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="Describe any evidence or attach documents..."
+                        rows={4}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="Any additional details or witnesses..."
                       />
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    {/* Evidence Photo Upload */}
+                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8">
+                      <div className="flex flex-col items-center gap-3 mb-4">
+                        <Upload className="w-8 h-8 text-blue-600" />
+                        <h3 className="text-lg font-semibold text-gray-900">Upload Evidence Photos</h3>
+                        <p className="text-sm text-gray-600">Minimum 1 photo required, select as many as needed</p>
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Uploaded Images Display */}
+                    {uploadedImages.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-4">Uploaded Photos ({uploadedImages.length})</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                          {uploadedImages.map((file, idx) => (
+                            <div key={idx} className="relative group">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`Evidence ${idx + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(idx)}
+                                className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 pt-6 sticky bottom-0 bg-white">
                       <button
                         type="submit"
-                        className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition transform hover:scale-105"
+                        className="flex-1 bg-blue-600 text-white px-6 py-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"
                       >
+                        <FileText className="w-5 h-5" />
                         File Complaint
                       </button>
                       <button
                         type="button"
-                        onClick={() => setIsFileComplaintOpen(false)}
-                        className="flex-1 bg-gray-200 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition"
+                        onClick={() => {
+                          setIsFileComplaintOpen(false)
+                          setSelectedCategory(null)
+                          setUploadedImages([])
+                        }}
+                        className="flex-1 bg-gray-200 text-gray-900 px-6 py-4 rounded-lg font-bold hover:bg-gray-300 transition"
                       >
                         Cancel
                       </button>
                     </div>
                   </form>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Case Analysis Modal */}
+      {isAIAnalysisOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                <Brain className="w-8 h-8 text-blue-600" />
+                AI Case Analysis
+              </h2>
+              <button 
+                onClick={() => {
+                  setIsAIAnalysisOpen(false)
+                  setAiAnalysisInput('')
+                  setAiAnalysisResult(null)
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {!aiAnalysisResult ? (
+                <div className="space-y-4">
+                  <p className="text-gray-600">Describe your case and our AI will help identify the case type and provide guidance.</p>
+                  <textarea
+                    value={aiAnalysisInput}
+                    onChange={(e) => setAiAnalysisInput(e.target.value)}
+                    rows={8}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    placeholder="Describe what happened, including details about people involved, dates, times, and any actions taken..."
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleAIAnalysis}
+                      disabled={isAnalyzing}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
+                    >
+                      <Brain className="w-5 h-5" />
+                      {isAnalyzing ? 'Analyzing...' : 'Analyze Case'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAIAnalysisOpen(false)
+                        setAiAnalysisInput('')
+                      }}
+                      className="flex-1 bg-gray-200 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <h3 className="text-2xl font-bold text-blue-900 mb-2">Case Type Identified:</h3>
+                    <p className="text-4xl font-bold text-blue-600">{aiAnalysisResult.caseType}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-gray-900">Description:</h4>
+                    <p className="text-gray-700 leading-relaxed">{aiAnalysisResult.description}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-gray-900">Next Steps:</h4>
+                    <ul className="space-y-2">
+                      {aiAnalysisResult.nextSteps.map((step: string, idx: number) => (
+                        <li key={idx} className="flex gap-3 text-gray-700">
+                          <span className="text-blue-600 font-bold">{idx + 1}.</span>
+                          <span>{step.replace(/^\d+\.\s*/, '')}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-gray-900">Relevant Laws:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {aiAnalysisResult.relevantLaws.map((law: string, idx: number) => (
+                        <span key={idx} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {law}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setIsFileComplaintOpen(true)
+                        setIsAIAnalysisOpen(false)
+                        setSelectedCategory(aiAnalysisResult.caseId)
+                        setAiAnalysisInput('')
+                        setAiAnalysisResult(null)
+                      }}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
+                    >
+                      <FileText className="w-5 h-5" />
+                      File Complaint Now
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAIAnalysisOpen(false)
+                        setAiAnalysisInput('')
+                        setAiAnalysisResult(null)
+                      }}
+                      className="flex-1 bg-gray-200 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
