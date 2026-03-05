@@ -84,10 +84,8 @@ const translations: Record<Language, Record<string, string>> = {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en')
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const savedLanguage = localStorage.getItem('language') as Language
     if (savedLanguage) {
       setLanguage(savedLanguage)
@@ -103,8 +101,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translations[language][key] || key
   }
 
-  if (!mounted) return children
-
   return (
     <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
       {children}
@@ -114,10 +110,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const savedTheme = localStorage.getItem('theme') as Theme
     if (savedTheme) {
       setTheme(savedTheme)
@@ -131,8 +125,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('theme', newTheme)
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
-
-  if (!mounted) return children
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
