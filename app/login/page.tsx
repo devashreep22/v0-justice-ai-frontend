@@ -44,7 +44,7 @@ export default function LoginPage() {
             <h2 className="text-2xl font-bold text-gray-900 text-center">Select Your Role</h2>
             <p className="text-center text-gray-600 text-sm">Choose your role to get started with JusticeAI</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               {/* Police Officer Role */}
               <button
                 onClick={() => setSelectedRole('police')}
@@ -68,6 +68,17 @@ export default function LoginPage() {
                   <p className="text-sm text-gray-600 mt-2">Manage your cases</p>
                 </div>
               </button>
+            </div>
+
+            {/* Admin Login Link */}
+            <div className="border-t border-gray-200 pt-6 mt-6">
+              <p className="text-center text-gray-600 text-sm mb-3">Are you an administrator?</p>
+              <Link
+                href="/admin-login"
+                className="w-full border-2 border-gray-300 hover:border-blue-600 text-gray-900 font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                Admin Portal
+              </Link>
             </div>
           </div>
         ) : (
