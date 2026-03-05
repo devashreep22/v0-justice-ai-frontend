@@ -21,17 +21,18 @@ export default function AdminLoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
 
-    // Admin credentials (demo)
-    if (email === 'admin@justiceai.com' && password === 'admin123') {
-      setIsLoading(true)
-      setTimeout(() => {
+    // API call would go here
+    setTimeout(() => {
+      // For now, allow any admin email ending with @justiceai.com
+      if (email.endsWith('@justiceai.com') && password.length >= 6) {
         router.push('/admin-dashboard')
-        setIsLoading(false)
-      }, 800)
-    } else {
-      setError('Invalid email or password')
-    }
+      } else {
+        setError('Invalid email or password')
+      }
+      setIsLoading(false)
+    }, 800)
   }
 
   if (!mounted) {
@@ -124,13 +125,6 @@ export default function AdminLoginPage() {
               {!isLoading && <ArrowRight className="w-5 h-5" />}
             </button>
           </form>
-
-          {/* Demo Credentials Note */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
-            <p className="font-semibold mb-2">Demo Credentials:</p>
-            <p>Email: admin@justiceai.com</p>
-            <p>Password: admin123</p>
-          </div>
 
           {/* Back to Main Login */}
           <div className="text-center">
