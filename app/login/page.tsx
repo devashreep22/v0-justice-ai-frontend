@@ -146,9 +146,12 @@ export default function LoginPage() {
             {/* Sign Up Link */}
             <p className="text-center text-gray-600 text-sm">
               Don't have an account?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link 
+                href={selectedRole === 'police' ? '/police-signup' : '/lawyer-signup'}
+                className="text-blue-600 hover:text-blue-700 font-semibold"
+              >
                 Sign up here
-              </a>
+              </Link>
             </p>
           </div>
         )}
