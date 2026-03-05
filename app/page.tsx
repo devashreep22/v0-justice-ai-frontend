@@ -5,10 +5,9 @@ import {
   Scale, Menu, X, ArrowRight, FileText, Users, Award, 
   Phone, MessageSquare, AlertCircle, Shield, Briefcase,
   Heart, AlertTriangle, Lock, BarChart3, Zap, Eye, CheckCircle,
-  Upload, Trash2, Brain, Copy, Moon, Sun, Globe
+  Upload, Trash2, Brain, Copy
 } from 'lucide-react'
 import Link from 'next/link'
-import { useLanguage, useTheme } from './providers'
 
 // Animated Pie Chart Component
 interface PieChartProps {
@@ -150,8 +149,6 @@ const AnimatedPieChart = ({ solved, unsolved, registered, label }: PieChartProps
 }
 
 export default function Home() {
-  const { language, setLanguage, t } = useLanguage()
-  const { theme, toggleTheme } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFileComplaintOpen, setIsFileComplaintOpen] = useState(false)
   const [isAIAnalysisOpen, setIsAIAnalysisOpen] = useState(false)
@@ -375,50 +372,28 @@ export default function Home() {
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Navigation */}
-      <nav className={`sticky top-0 z-50 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <Scale className="w-8 h-8 text-blue-600" />
-              <span className="font-bold text-xl">JusticeAI</span>
+              <span className="font-bold text-xl text-gray-900">JusticeAI</span>
             </div>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className={`${theme === 'dark' ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'} transition font-medium`}>{t('home')}</Link>
+              <Link href="/" className="text-gray-700 hover:text-blue-600 transition font-medium">Home</Link>
               <button 
                 onClick={() => setIsFileComplaintOpen(true)}
-                className={`${theme === 'dark' ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'} transition font-medium`}>{t('fileCase')}</button>
+                className="text-gray-700 hover:text-blue-600 transition font-medium">File Case</button>
               <button 
                 onClick={() => setIsAIAnalysisOpen(true)}
-                className={`${theme === 'dark' ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'} transition font-medium`}>{t('aiAnalysis')}</button>
-              <Link href="/login" className={`${theme === 'dark' ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'} transition font-medium`}>{t('trackCases')}</Link>
-              
-              {/* Language Dropdown */}
-              <select 
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as any)}
-                className={`px-3 py-1 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'} text-sm font-medium flex items-center gap-2`}
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="hi">हिंदी</option>
-                <option value="de">Deutsch</option>
-              </select>
-
-              {/* Theme Toggle */}
-              <button 
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition ${theme === 'dark' ? 'bg-gray-700 text-yellow-400' : 'bg-gray-100 text-gray-700'}`}
-              >
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
+                className="text-gray-700 hover:text-blue-600 transition font-medium">AI Analysis</button>
+              <Link href="/login" className="text-gray-700 hover:text-blue-600 transition font-medium">Track Cases</Link>
               <Link href="/login" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-                {t('login')}
+                Login
               </Link>
             </div>
 
@@ -433,42 +408,22 @@ export default function Home() {
 
           {/* Mobile Menu */}
           {isMenuOpen && (
-            <div className={`md:hidden pb-4 space-y-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <Link href="/" className={`block px-4 py-2 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded transition`}>{t('home')}</Link>
+            <div className="md:hidden pb-4 space-y-2 border-t border-gray-200">
+              <Link href="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">Home</Link>
               <button 
                 onClick={() => {
                   setIsFileComplaintOpen(true)
                   setIsMenuOpen(false)
                 }}
-                className={`block w-full text-left px-4 py-2 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded transition`}>{t('fileCase')}</button>
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">File Case</button>
               <button 
                 onClick={() => {
                   setIsAIAnalysisOpen(true)
                   setIsMenuOpen(false)
                 }}
-                className={`block w-full text-left px-4 py-2 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded transition`}>{t('aiAnalysis')}</button>
-              <Link href="/login" className={`block px-4 py-2 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded transition`}>{t('trackCases')}</Link>
-              <div className="px-4 py-2 space-y-2">
-                <select 
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as any)}
-                  className={`w-full px-3 py-1 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'} text-sm font-medium`}
-                >
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="hi">हिंदी</option>
-                  <option value="de">Deutsch</option>
-                </select>
-              </div>
-              <button 
-                onClick={toggleTheme}
-                className={`w-full text-left px-4 py-2 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded transition flex items-center gap-2`}
-              >
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </button>
-              <Link href="/login" className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">{t('login')}</Link>
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">AI Analysis</button>
+              <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">Track Cases</Link>
+              <Link href="/login" className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">Login</Link>
             </div>
           )}
         </div>
