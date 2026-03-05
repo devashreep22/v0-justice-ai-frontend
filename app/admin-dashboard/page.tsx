@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Scale, LogOut, Bell, Settings, Search, Filter, Check, X,
   Eye, Shield, Briefcase, Clock, CheckCircle, XCircle, User
@@ -31,10 +31,15 @@ interface PendingApproval {
 
 export default function AdminDashboard() {
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending')
   const [selectedApproval, setSelectedApproval] = useState<PendingApproval | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'police' | 'lawyer'>('all')
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Mock data - pending approvals
   const [approvals, setApprovals] = useState<PendingApproval[]>([
@@ -149,6 +154,17 @@ export default function AdminDashboard() {
     rejected: approvals.filter(a => a.status === 'rejected').length,
     totalPolice: approvals.filter(a => a.type === 'police').length,
     totalLawyer: approvals.filter(a => a.type === 'lawyer').length
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

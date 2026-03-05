@@ -391,7 +391,7 @@ export default function Home() {
               <button 
                 onClick={() => setIsAIAnalysisOpen(true)}
                 className="text-gray-700 hover:text-blue-600 transition font-medium">AI Analysis</button>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 transition font-medium">My Cases</Link>
+              <Link href="/login" className="text-gray-700 hover:text-blue-600 transition font-medium">Track Cases</Link>
               <Link href="/login" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
                 Login
               </Link>
@@ -422,7 +422,7 @@ export default function Home() {
                   setIsMenuOpen(false)
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">AI Analysis</button>
-              <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">My Cases</Link>
+              <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">Track Cases</Link>
               <Link href="/login" className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">Login</Link>
             </div>
           )}
