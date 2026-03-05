@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { Scale, Shield, Briefcase, Mail, Lock, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [selectedRole, setSelectedRole] = useState<'police' | 'lawyer' | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,7 +17,11 @@ export default function LoginPage() {
     setIsLoading(true)
     // Simulate login
     setTimeout(() => {
-      window.location.href = '/'
+      if (selectedRole === 'police') {
+        router.push('/police-dashboard')
+      } else if (selectedRole === 'lawyer') {
+        router.push('/lawyer-dashboard')
+      }
       setIsLoading(false)
     }, 800)
   }
@@ -140,9 +146,12 @@ export default function LoginPage() {
             {/* Sign Up Link */}
             <p className="text-center text-gray-600 text-sm">
               Don't have an account?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link 
+                href={selectedRole === 'police' ? '/police-signup' : '/lawyer-signup'}
+                className="text-blue-600 hover:text-blue-700 font-semibold"
+              >
                 Sign up here
-              </a>
+              </Link>
             </p>
           </div>
         )}
