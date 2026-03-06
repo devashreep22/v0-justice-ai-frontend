@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import {
   Scale, LogOut, Bell, Settings, Search, Filter, Check, X,
-  Eye, Shield, Briefcase, Clock, CheckCircle, XCircle, User
+  Eye, Shield, Briefcase, Clock, CheckCircle, XCircle, User, Activity
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -186,8 +186,15 @@ export default function AdminDashboard() {
                 <Bell className="w-6 h-6 text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
               </button>
+              <Link
+                href="/admin-activity"
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              >
+                <Activity className="w-5 h-5" />
+                Activity Log
+              </Link>
               <button
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/admin-login')}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
               >
                 <LogOut className="w-5 h-5" />
